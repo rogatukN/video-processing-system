@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" click="addContextMenu(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			import events.VideoPopUpEvent;
+			
+			import vo.DetectionViewDataVO;
+			
+			[Bindable]
+			public var detectData: BitmapData;
+			[Bindable]
+			public var flag: Boolean = true;
+			[Bindable]
+			public var arr: ArrayCollection; 
+			override public function set data(value:Object):void{
+				super.data = value;
+				arr = value as ArrayCollection;
+				detectData = (arr.getItemAt(0) as DetectionViewDataVO).detectBitMap;
+				flag = (arr.getItemAt(0) as DetectionViewDataVO).flag;
+			}
+			
+			protected function addContextMenu(event:MouseEvent):void
+			{
+				if (!flag){
+					return;
+				}
+				var popUpevent : VideoPopUpEvent = new VideoPopUpEvent(VideoPopUpEvent.OPEN_SLIDE_POP_UP);
+				popUpevent.slides = data as ArrayCollection;
+				dispatchEvent(popUpevent);
+			}
+		]]>
+	</fx:Script>
+	<s:Rect top="0" bottom="0" left="0" right="0"
+			visible="{flag}">
+		<s:stroke>
+			<s:SolidColorStroke color="{0xFFAA00}"/>
+		</s:stroke>
+	</s:Rect>
+	<s:BitmapImage source="{detectData}"
+				   top="2" left="2" right="2" bottom="2"/>
+	<s:Label bottom="0" right="0" text="{arr.length}"/>
+</s:ItemRenderer>

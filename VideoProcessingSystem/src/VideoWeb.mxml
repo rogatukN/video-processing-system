@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:view="view.*"
+			   minWidth="955" minHeight="600"
+			   creationComplete="onCreationComplete(event)">
+	<fx:Style source="styles/Styles.css"/>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import events.ScreenShotEvent;
+			
+			protected function onCreationComplete(event:FlexEvent):void {
+				if(Worker.isSupported){
+					addEventListener("extCall", onExtCall);
+					ExternalInterface.addCallback("startVideo", start);
+				}
+			}
+			protected function start(value : String):void{
+				main.onStart();
+			}
+			
+			
+			protected function onExtCall(event:ScreenShotEvent):void{
+				var result:int = ExternalInterface.call('addMark',event.time);
+			}
+			
+		]]>
+	</fx:Script>
+	<view:MainView id="main" width="100%" height="100%"/>
+</s:Application>

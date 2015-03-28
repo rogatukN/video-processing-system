@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" buttonMode="true"
+				click="itemrenderer1_clickHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import model.OptionsModel;
+			import model.VideoModel;
+			
+			import vo.MoveObject;
+			import vo.view.SimplyTexturaViewVO;
+			[Bindable]
+			public var videoModel : VideoModel = VideoModel.instance;
+			[Bindable]
+			public var optionModel : OptionsModel = OptionsModel.instance;
+			
+			protected function itemrenderer1_clickHandler(event:MouseEvent):void
+			{
+				optionModel.gistograma2 = new MoveObject(SimplyTexturaViewVO(data).bitMap, new Point());
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Group>
+		<s:BitmapImage source="{SimplyTexturaViewVO(data).bitMap}"
+					   top="2" left="2" right="2" bottom="2"/>
+	</s:Group>
+</s:ItemRenderer>

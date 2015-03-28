@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					styleName="optionsContent">
+	<fx:Script>
+		<![CDATA[
+			import controller.VideoController;
+			
+			import events.OptionsEvent;
+			
+			import model.OptionsModel;
+			import model.ViewModel;
+			
+			import utils.SamplerLoader;
+			
+			import vo.MoveObject;
+			[Bindable]
+			public var viewModel:ViewModel = ViewModel.instance;
+			[Bindable]
+			public var optionModel:OptionsModel = OptionsModel.instance;
+			public var control:VideoController = VideoController.instance;
+			
+			protected function load(event:MouseEvent):void
+			{
+				var sapler : SamplerLoader = new SamplerLoader();
+				sapler.addEventListener('samplerLoadComplete', samplerLoadComplete);
+				function samplerLoadComplete(event: Event):void{
+					var moveObj: MoveObject = new MoveObject(sapler.data,new Point());
+					optionModel.loadedSampler.addItem(moveObj);
+				}
+			}
+			
+			protected function onOffSetchange(event:Event):void
+			{
+				var optEvent: OptionsEvent = new events.OptionsEvent(OptionsEvent.DETECT_SELECTED,event.currentTarget.selectedItem);
+				dispatchEvent(optEvent);
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"/>
+	</s:layout>
+	<s:Button label="Завантажити" click="load(event)"/>
+	<s:List  width="100%" height="100%" dataProvider="{optionModel.loadedSampler}"
+			 itemRenderer="itemRenderers.MoveObjectItemRenderer" 
+			 borderAlpha="0" contentBackgroundAlpha="0"
+			 change="onOffSetchange(event)">
+		<s:layout>
+			<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+		</s:layout>
+	</s:List>
+</s:NavigatorContent>

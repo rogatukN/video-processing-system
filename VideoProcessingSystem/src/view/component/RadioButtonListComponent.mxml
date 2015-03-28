@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" gap="2">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			public var title : String;
+			[Bindable]
+			private var _dataProvider : ArrayCollection;
+			[Bindable]
+			private var _selectedItem : String;
+
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+			}
+
+			[Bindable(event="selectionChange")]
+			public function get selectedItem():String
+			{
+				return _selectedItem;
+			}
+
+			public function set selectedItem(value:String):void
+			{
+				_selectedItem = value;
+			}
+
+			protected function setSelection(event:Event):void
+			{
+				_selectedItem = event.currentTarget.selectedItem;
+				dispatchEvent(new Event('selectionChange'));
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Metadata>
+		[Event(name="selectionChange", type="flash.events.Event")]
+	</fx:Metadata>
+	<s:Label text="{title}" styleName="optionsTitleLabel"/>
+	<s:List dataProvider="{_dataProvider}" contentBackgroundAlpha="0" borderAlpha="0"
+			selectedItem="{_selectedItem}" change="setSelection(event)">
+		<s:layout>
+			<s:TileLayout requestedRowCount="2"/>
+		</s:layout>
+		<s:itemRenderer>
+			<fx:Component>
+				<s:ItemRenderer autoDrawBackground="false">
+					<s:states>
+						<s:State name="normal"/>
+						<s:State name="hovered"/>
+						<s:State name="selected"/>
+					</s:states>
+					<s:RadioButton label="{data}" selected.selected="true"/>
+				</s:ItemRenderer>
+			</fx:Component>
+		</s:itemRenderer>
+	</s:List>
+</s:VGroup>

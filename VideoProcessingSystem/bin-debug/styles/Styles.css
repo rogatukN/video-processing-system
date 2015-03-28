@@ -1,0 +1,15 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+s|Label.optionsTitleLabel
+{
+	color: #7F0037;
+	fontSize: 14;
+	fontWeight:bold;
+}
+
+s|NavigatorContent.optionsContent
+{
+	backgroundColor: #eeeeee;
+}

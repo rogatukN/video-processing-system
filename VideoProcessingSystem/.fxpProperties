@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" compiles="true" parentProject="f85fe4fe-2047-4704-95e4-e0daa0ebcafc" projectUUID="f85fe4fe-2047-4704-95e4-e0daa0ebcafc" pureCatalystProject="false" sdkVersion="4.6.0" uuid="7ecf6369-bf9b-4f8d-8a59-118c3a43619f" version="15">
+  <projects/>
+  <src/>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="7ecf6369-bf9b-4f8d-8a59-118c3a43619f"/>
+    <linked location="C:/denwer/home/test_oc/www/overc-client/VideoWeb/libs" path="/libs" position="1" uuid="1a68d732-e78e-4333-b28e-0dddc96fa0cd"/>
+  </swc>
+  <misc/>
+  <theme/>
+  <mxmlFormattingPrefs groupAttributesByState="true" maxLineWidth="100" mxmlAlignAttributes="true" mxmlAttributeOrder="id,userLabel,includeIn,excludeFrom,visible,x,y,z,left,right,top,bottom,width,height,minWidth,minHeight,maxWidth,maxHeight,label" mxmlKeepAttributeValuesOrganized="true"/>
+</fxpProperties>

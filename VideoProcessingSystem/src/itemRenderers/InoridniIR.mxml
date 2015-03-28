@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" mouseDown="onClick(event)"
+				buttonMode="true">
+	<fx:Script>
+		<![CDATA[
+			import events.OptionsEvent;
+			import events.ScreenShotEvent;
+			import events.VideoPopUpEvent;
+			
+			import model.VideoModel;
+			
+			import vo.view.MoveObjectViewVO;
+			[Bindable]
+			public var videoModel : VideoModel = VideoModel.instance;
+			
+			protected function onClick(event:MouseEvent):void
+			{ 
+				MoveObjectViewVO(data).selected = true;
+				var extEvent:ScreenShotEvent = new ScreenShotEvent("extCall", null, MoveObjectViewVO(data).time,0,true);
+				dispatchEvent(extEvent);
+				/*var optEvent: OptionsEvent = new events.OptionsEvent(OptionsEvent.DETECT_SELECTED,data);
+				dispatchEvent(optEvent);*/
+			}
+		
+			protected function removeContextMenu(event:MouseEvent):void
+			{
+				var popUpevent : VideoPopUpEvent = new VideoPopUpEvent(VideoPopUpEvent.ClOSE_POP_UP,data.frame);
+				dispatchEvent(popUpevent);
+				MoveObjectViewVO(data).conMenu = false;
+			}
+			
+			protected function addContextMenu(event:MouseEvent):void
+			{
+				var popUpevent : VideoPopUpEvent = new VideoPopUpEvent(VideoPopUpEvent.OPEN_POP_UP,data.frame);
+				dispatchEvent(popUpevent);
+				MoveObjectViewVO(data).conMenu = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Group rightMouseUp="removeContextMenu(event)"
+			 contextMenu="addContextMenu(event)">
+		<s:Rect top="0" bottom="0" left="0" right="0">
+			<s:stroke>
+				<s:SolidColorStroke color="{(MoveObjectViewVO(data).selected)?0x00137F:0xffffff}"/>
+			</s:stroke>
+		</s:Rect>
+		<s:Rect top="0" bottom="0" left="0" right="0" visible="{MoveObjectViewVO(data).conMenu}">
+			<s:stroke>
+				<s:SolidColorStroke color="#0094FF" weight="2"/>
+			</s:stroke>
+		</s:Rect>
+		<s:BitmapImage source="{MoveObjectViewVO(data).bitMap}"
+					   top="2" left="2" right="2" bottom="2"/>
+	</s:Group>
+</s:ItemRenderer>

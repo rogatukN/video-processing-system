@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 styleName="optionsContent" xmlns:component="view.component.*">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import controller.VideoController;
+			
+			import model.OptionsModel;
+			import model.ViewModel;
+			
+			import states.ModeStates;
+			[Bindable]
+			public var viewModel:ViewModel = ViewModel.instance;
+			[Bindable]
+			public var optionModel:OptionsModel = OptionsModel.instance;
+			public var control:VideoController = VideoController.instance;
+			[Bindable]
+			private var _etalon : ArrayCollection;
+			[Bindable]
+			private var _collectedEtalon : ArrayCollection;
+			
+			protected function optionsStateEnter(event:FlexEvent):void
+			{
+				_collectedEtalon = viewModel.foreignObjects1;
+				_etalon = new ArrayCollection();
+			}
+			
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="options" enterState="optionsStateEnter(event)"/>
+	</s:states>
+	<fx:Declarations>
+		<s:ArrayCollection id="tabBrData">
+			<fx:Object>r</fx:Object>
+			<fx:Object>g</fx:Object>
+			<fx:Object>b</fx:Object>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	<s:HGroup height="100%" width="100%">
+		<s:BitmapImage source="{optionModel.gistograma1.testBitMap}"/>
+		<s:List  width="300" height="100%" dataProvider="{optionModel.collectedEtalon}"
+				 itemRenderer="itemRenderers.SimplyTexturaItemRenderer" 
+				 borderAlpha="0" contentBackgroundAlpha="0"
+				 includeIn="normal">
+			<s:layout>
+				<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+			</s:layout>
+		</s:List>
+		<s:VGroup width="100%" height="100%">
+			<mx:TabBar id="tabBar" dataProvider="{tabBrData}"/>
+			<mx:ViewStack width="100%" height="100%" selectedIndex="{tabBar.selectedIndex}">
+				<s:NavigatorContent>
+					<component:ViewDataShow histogram1="{optionModel.gistograma1.rgbHistograms.r}"
+											histogram2="{optionModel.gistograma2.rgbHistograms.r}"
+											cluster1="{new ArrayCollection(optionModel.gistograma1.clusters)}"
+											cluster2="{new ArrayCollection(optionModel.gistograma2.clusters)}"/>
+				</s:NavigatorContent>
+				<s:NavigatorContent>
+					<component:ViewDataShow histogram1="{optionModel.gistograma1.rgbHistograms.g}"
+											histogram2="{optionModel.gistograma2.rgbHistograms.g}"
+											cluster1="{new ArrayCollection(optionModel.gistograma1.clusters)}"
+											cluster2="{new ArrayCollection(optionModel.gistograma2.clusters)}"/>
+				</s:NavigatorContent>
+				<s:NavigatorContent>
+					<component:ViewDataShow histogram1="{optionModel.gistograma1.rgbHistograms.b}"
+											histogram2="{optionModel.gistograma2.rgbHistograms.b}"
+											cluster1="{new ArrayCollection(optionModel.gistograma1.clusters)}"
+											cluster2="{new ArrayCollection(optionModel.gistograma2.clusters)}"/>
+				</s:NavigatorContent>
+			</mx:ViewStack>
+		</s:VGroup>
+	</s:HGroup>
+	<s:Button label="Змінити" enabled="{optionModel.mainModeState == ModeStates.CLIENT_HANDLET}"
+			  includeIn="normal" click="currentState = 'options';"/>
+	<s:HGroup width="100%" height="100%" includeIn="options" gap="0"
+			  paddingTop="5">
+		<s:VGroup width="50%" height="100%">
+			<s:Label text="Зібрані" styleName="optionsTitleLabel"/>
+			<s:List width="100%" height="100%"  itemRenderer="itemRenderers.TexturaItemRenderer" 
+					contentBackgroundAlpha="0"
+					dataProvider="{viewModel.foreignObjects1}" dropEnabled="true">
+				<s:layout>
+					<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+				</s:layout>
+			</s:List>
+		</s:VGroup>
+		<s:VGroup width="50%" height="100%">
+			<s:Label text="Еталоні" styleName="optionsTitleLabel"/>
+			<s:List width="100%" height="100%"  itemRenderer="itemRenderers.TexturaItemRenderer" 
+					contentBackgroundAlpha="0"
+					dataProvider="{viewModel.foreignObjects2}" dropEnabled="true">
+				<s:layout>
+					<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+				</s:layout>
+			</s:List>
+		</s:VGroup>
+	</s:HGroup>
+	<!--<s:HGroup includeIn="options" width="100%" height="100%"
+			  paddingBottom="10" paddingLeft="10" paddingTop="10" paddingRight="10">
+		<s:Button label="Завантажити текстуру" click="dispatchEvent(new OptionsEvent(OptionsEvent.LOAD_ETALON))"/>
+		<s:List dataProvider="{optionModel.clientEtalon}"
+				width="200" height="200">
+			<s:layout>
+				<s:TileLayout horizontalGap="10"/>
+			</s:layout>
+			<s:itemRenderer>
+				<fx:Component>
+					<s:ItemRenderer autoDrawBackground="false">
+						<s:Label text="Текстура {itemIndex+1}"
+								 styleName="optionsTitleLabel"/>
+					</s:ItemRenderer>
+				</fx:Component>
+			</s:itemRenderer>
+		</s:List>
+	</s:HGroup>-->
+</s:NavigatorContent>

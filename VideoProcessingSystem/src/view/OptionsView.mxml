@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:component="view.component.*" xmlns:view="view.*">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.IndexChangedEvent;
+			
+			import events.OptionsEvent;
+			
+			import model.OptionsModel;
+			import model.ViewModel;
+			
+			import states.ModeStates;
+			[Bindable]
+			public var optionsModel:OptionsModel = OptionsModel.instance;
+			[Bindable]
+			public var viewModel:ViewModel = ViewModel.instance;
+			
+			protected function view_changeHandler(event:IndexChangedEvent):void
+			{
+				switch(event.newIndex)
+				{
+					case 1:
+					{
+						var optEvent: OptionsEvent = new events.OptionsEvent(OptionsEvent.GET_COLLECTED_ETALON);
+						dispatchEvent(optEvent);
+						break;
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:VGroup width="100%" height="100%" gap="0">
+		<s:HGroup width="100%" height="75">
+			<component:RadioButtonListComponent id="mode" title="Режими" dataProvider="{ModeStates.PROVIDER}"
+												selectedItem="@{optionsModel.mainModeState}"/>
+			<view:AllOptionsComponent width="100%" height="100%"/>
+		</s:HGroup>
+		<mx:TabBar dataProvider="{view}"/>
+		<mx:ViewStack id="view" width="100%" height="100%"
+					  change="view_changeHandler(event)">
+			<view:LoadedSimplyView label="Завантажені"/>
+			<view:EtalonListView label="Еталоні текстури"/>
+			<s:NavigatorContent label="Test" width="100%" height="100%">
+				<s:List width="100%" height="100%" dataProvider="{viewModel.frames}">
+					<s:layout>
+						<s:TileLayout/>
+					</s:layout>
+					<s:itemRenderer>
+						<fx:Component>
+							<s:ItemRenderer>
+								<fx:Script>
+									<![CDATA[
+										import vo.FrameVO;
+									]]>
+								</fx:Script>
+								<s:BitmapImage source="{FrameVO(data).bitMap}"/>
+							</s:ItemRenderer>
+						</fx:Component>
+					</s:itemRenderer>
+				</s:List>
+			</s:NavigatorContent>
+		</mx:ViewStack>
+	</s:VGroup>
+</s:Group>

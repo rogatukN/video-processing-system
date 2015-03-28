@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:component="view.component.*"
+		 xmlns:view="view.*"
+		 creationComplete="group1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.graphics.codec.PNGEncoder;
+			import mx.managers.PopUpManager;
+			
+			import appConst.Const;
+			
+			import controller.VideoController;
+			import controller.WorkerController;
+			
+			import events.OptionsEvent;
+			import events.ScreenShotEvent;
+			import events.VideoPopUpEvent;
+			
+			import model.OptionsModel;
+			import model.ViewModel;
+			
+			import states.ModeStates;
+			
+			import utils.BitMapUtils;
+			import utils.ReadFile;
+			
+			import vo.FrameVO;
+			import vo.MoveObject;
+			[Bindable]
+			public var videoController : VideoController = VideoController.instance;
+			
+			public var workerController1:WorkerController = new WorkerController();
+			public var workerController2:WorkerController = new WorkerController();
+			
+			[Bindable]
+			public var viewModel:ViewModel = ViewModel.instance;
+			[Bindable]
+			public var optionModel:OptionsModel = OptionsModel.instance;
+			
+			public function onStart():void {
+				if(!videoController.hasEventListener(ScreenShotEvent.COMPUTE)){
+					videoController.addEventListener(ScreenShotEvent.COMPUTE, onCompute);
+					list1.addEventListener(VideoPopUpEvent.OPEN_POP_UP,addPopUp);
+					list1.addEventListener(VideoPopUpEvent.ClOSE_POP_UP,closePopUp);
+					list2.addEventListener(VideoPopUpEvent.OPEN_POP_UP,addPopUp);
+					list2.addEventListener(VideoPopUpEvent.ClOSE_POP_UP,closePopUp);
+					detectList.addEventListener(VideoPopUpEvent.OPEN_SLIDE_POP_UP,addSlideShow);
+					addEventListener(events.OptionsEvent.OFFSET_CHANGE,setOffset);
+					addEventListener(events.OptionsEvent.LOAD_ETALON,fileOpen);
+					addEventListener(events.OptionsEvent.ALLOW_RECEIVE_ETALON,setAllowReceive);
+					addEventListener(events.OptionsEvent.DETECT_SELECTED,setDetectionElement);
+					addEventListener(events.OptionsEvent.GET_COLLECTED_ETALON,getEtalon);
+				}
+				videoController.startVideo(videoArea);
+			}
+			
+			protected function getEtalon(event : events.OptionsEvent):void{
+				workerController1.getCollectedEtalon();
+			}
+			
+			protected function setOffset(event : events.OptionsEvent):void{
+				workerController1.setOffset(event.data as int);
+				workerController2.setOffset(event.data as int);
+			}
+			
+			protected function setAllowReceive(event : events.OptionsEvent):void{
+				workerController1.setAllowReceiveEtalon(event.data as int);
+				workerController2.setAllowReceiveEtalon(event.data as int);
+			}
+			
+			private function setDetectionElement(event : events.OptionsEvent):void
+			{
+				optionModel.mainModeState = ModeStates.CLIENT_HANDLET;
+				var mo:MoveObject = new MoveObject(event.data.bitMap, new Point());
+				//mo.setfilter(FilterConsts.L_20);
+				optionModel.gistograma1 = mo;
+				workerController1.setDetectionEtalon(event.data.bitMap);
+				workerController2.setDetectionEtalon(event.data.bitMap);
+			}
+			
+			protected function addSlideShow(event : VideoPopUpEvent):void
+			{
+				slideShowComponent.dataProvider = event.slides;
+				slideShowComponent.x = 0;
+				slideShowComponent.y = mouseY//-Const.VIDEO_HIGHT-20;
+				PopUpManager.addPopUp(slideShowComponent,this.owner);
+			}
+			
+			protected function addPopUp(event : VideoPopUpEvent):void
+			{
+				popUp.data = event.bitmapdata;
+				popUp.x = 0;
+				popUp.y = mouseY-Const.VIDEO_HIGHT-20;
+				PopUpManager.addPopUp(popUp,this.owner);
+			}
+			
+			protected function closePopUp(event : VideoPopUpEvent):void
+			{
+				PopUpManager.removePopUp(popUp);
+			}
+			
+			protected function onCompute(event:ScreenShotEvent):void{
+				var frame: FrameVO = new FrameVO();
+				frame.bitMap = event.bitmapdata;
+				var id: Number = frame.id;
+				viewModel.frames.addItem(frame);
+				if (event.index == 0){
+					workerController1.computeFrame(id, event.bitmapdata, event.time, event.index);
+				}else{
+					workerController2.computeFrame(id, event.bitmapdata, event.time, event.index);
+				}
+				
+			}
+			
+			private var file : ReadFile;
+			public function fileOpen(event : OptionsEvent):void{
+				file = new ReadFile();
+				file.addEventListener('complete',setNewVectors);
+			}
+			
+			private function setNewVectors(ev: Event):void
+			{
+				optionModel.clientEtalon.addItem(file.vectorsArray);
+				workerController1.setClientEtalon(optionModel.clientEtalon);
+				workerController2.setClientEtalon(optionModel.clientEtalon);
+			}
+			
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				onStart();
+				setTestBitmap();
+			}
+			
+			public var timer: Timer;
+			protected function test(event:FlexEvent):void
+			{
+				timer = new Timer(250);
+				timer.addEventListener(TimerEvent.TIMER,onTimer);
+				 function onTimer(event: TimerEvent):void
+				{
+					 var foto : BitmapData = new BitmapData(Const.VIDEO_WIDTH,Const.VIDEO_HIGHT);
+					 foto.draw(videoArea);
+					 var frame: FrameVO = new FrameVO();
+					 frame.bitMap = foto;
+					 viewModel.frames.addItem(frame);
+				}
+				 videoController.startVideo(videoArea);
+				 timer.start();
+			}
+			
+			
+			private function setTestBitmap():void
+			{
+				viewModel.mainBitMap = new BitmapData(Const.VIDEO_WIDTH, Const.VIDEO_HIGHT);
+				for (var k:int = 0; k < Const.VIDEO_WIDTH; k++) 
+				{
+					for (var i2:int = 0; i2 < Const.VIDEO_HIGHT; i2++) 
+					{
+						viewModel.mainBitMap.setPixel32(k,i2,0x00ff0000);
+					}
+				}
+				var con: int = 30;
+				for (var i3:int = 0; i3 < 2; i3++) 
+				{
+					/*var percent: Number = 0.2;
+					var radius: Number = optionModel.offset*2+1;
+					var hCount: int = Math.floor(140/radius);
+					var wCount: int = Math.floor(320/radius);
+					var fullCount: int = hCount*wCount;
+					var maxI: int = Math.round(percent*fullCount);
+					
+					for (var i:int = 0; i < maxI; i++) 
+					{
+							var point: Point = BitMapUtils.getMoveObjectPoint(i,i3,optionModel.offset);
+							setRect(point.x,point.y,0xffffff00);
+					}*/
+					for (var i:int = 0; i < 3; i++) 
+					{
+						for (var j:int = 0; j < 3; j++) 
+						{
+							var point: Point = new Point(15+Const.PADDING_FRAME+i*4*optionModel.offset,(2*i3+1)*Const.PADDING_FRAME+2*j*optionModel.offset);
+							setRect(point.x,point.y,0xffffff00);
+						}
+					}
+				}
+			}
+			
+			public function setRect(x: Number, y: Number,color:uint):void{
+				for (var i: int = x-optionModel.offset; i <= x+optionModel.offset; i++) 
+				{
+					for (var j: int = y-optionModel.offset; j <= y+optionModel.offset; j++) 
+					{
+						if ((i<x-optionModel.offset+2 || i>x+optionModel.offset-2) && (j<y-optionModel.offset+2 || j>y+optionModel.offset-2)){
+							viewModel.mainBitMap.setPixel32(i,j,color);
+						}
+					}
+				}
+			}
+			protected function stop(event:MouseEvent):void
+			{
+				videoController.pause();
+				timer.stop();
+				/*var test: TestController = new TestController();
+				test.getPixels(viewModel.frames);*/
+			}
+			
+			protected function togglebutton1_mouseDownHandler(event:MouseEvent):void
+			{
+				ExternalInterface.call('toggleColumnWidth');
+			}
+			
+			/*var index: int = 10000;
+			protected function save(bitMap: BitmapData):void
+			{
+				var fl:File = new File("C:/Users/Настя/Desktop/VideoData/"+index+'.png');
+				index++;
+				var fs:FileStream = new FileStream();
+				var imgByteArray: ByteArray = new PNGEncoder().encode(bitMap);
+				try{
+					
+					fs.open(fl,FileMode.WRITE);
+					fs.writeBytes(imgByteArray);
+					fs.close();
+				}catch(e:Error){
+					trace(e.message);
+				}
+			}*/
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<component:PopUp id="popUp"/>
+		<component:SlideShowComponent id="slideShowComponent" close="PopUpManager.removePopUp(slideShowComponent);"/>
+	</fx:Declarations>
+	<s:HGroup width="100%" height="100%">
+		<s:VGroup height="100%" width="320" gap="0">
+			<s:BorderContainer width="320" height="280">
+				<mx:UIComponent id="videoArea"
+								top="0" bottom="0" left="0" right="0"/>
+				<s:BitmapImage width="{Const.VIDEO_WIDTH}" height="{Const.VIDEO_HIGHT}"
+							   source="{viewModel.mainBitMap}" visible="false"/>
+			</s:BorderContainer>
+			<s:BorderContainer width="100%" includeInLayout="false" visible="false">
+				<s:layout>
+					<s:TileLayout/>
+				</s:layout>
+				<s:Button label="START VIDEO" click="onStart();" width="100"/>
+				<s:Button label="resume" click="videoController.resume(); videoController.addEventListener(ScreenShotEvent.COMPUTE, onCompute);" width="100"/>
+				<s:Button label="pause" click="stop(event)" width="100"/>
+				<component:LabelComponent title="frame" text="{videoController.counterFrame}"/>
+			</s:BorderContainer>
+			<s:List id="list1" width="100%" height="100%" dataProvider="{viewModel.foreignObjects1}"
+					includeInLayout="{optionModel.mainModeState == ModeStates.AUTO}"
+					visible="{optionModel.mainModeState == ModeStates.AUTO}"
+					itemRenderer="itemRenderers.InoridniIR" contentBackgroundColor="#8BA5B7" borderAlpha="0" contentBackgroundAlpha=".3">
+				<s:layout>
+					<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+				</s:layout>
+			</s:List>
+			<s:List id="list2" width="100%" height="100%" dataProvider="{viewModel.foreignObjects2}"
+					includeInLayout="{optionModel.mainModeState == ModeStates.AUTO}"
+					visible="{optionModel.mainModeState == ModeStates.AUTO}"
+					itemRenderer="itemRenderers.InoridniIR" contentBackgroundColor="#8BA5B7" borderAlpha="0" contentBackgroundAlpha=".3">
+				<s:layout>
+					<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+				</s:layout>
+			</s:List>
+			<s:List id="detectList" width="100%" height="100%" dataProvider="{viewModel.detectionFrames}"
+					includeInLayout="{optionModel.mainModeState == ModeStates.CLIENT_HANDLET}"
+					visible="{optionModel.mainModeState == ModeStates.CLIENT_HANDLET}"
+					itemRenderer="itemRenderers.DetectionItemRendere"
+					contentBackgroundColor="#8BA5B7" borderAlpha="0" contentBackgroundAlpha=".3">
+				<s:layout>
+					<s:TileLayout paddingLeft="3" paddingRight="3" paddingTop="3" paddingBottom="3"/>
+				</s:layout>
+			</s:List>
+			<s:ToggleButton selected="@{optionModel.optionsVisible}" label="Панель опцій"
+							mouseDown="togglebutton1_mouseDownHandler(event)"/>
+		</s:VGroup>
+		<view:OptionsView width="80" height="100%" visible="{optionModel.optionsVisible}"/>
+	</s:HGroup>
+</s:Group>
